@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="OTPinMaster">
+        <attr name="rectangleHeight" format="dimension"/>
+        <attr name="rectangleWidth" format="dimension"/>
+        <attr name="activeRectangleColor" format="color"/>
+        <attr name="inactiveRectangleColor" format="color"/>
+        <attr name="errorRectangleColor" format="color"/>
+        <attr name="rectangleSpace" format="dimension"/>
+        <attr name="rectangleCount" format="integer"/>
+        <attr name="circleRadius" format="dimension"/>
+        <attr name="circleColor" format="color"/>
+        <attr name="isPin" format="boolean"/>
+        <attr name="textBottomPadding" format="dimension"/>
+    </declare-styleable>
+</resources>
