@@ -1,7 +1,9 @@
 <h1 align="center">OTPinMaster</a></h1>
 <h3 align="center">A highly customisable view for handling pin code and otp input with beautiful animations</h3>
-https://github.com/matrobiyon/otp_pin_master/assets/111564722/9a5c394b-6a41-4fd3-b9f5-1a5cb08fab5e
-https://github.com/matrobiyon/otp_pin_master/assets/111564722/b6cd0035-c252-4d46-bf44-0b9817bc882c
+<img src="https://github.com/matrobiyon/otp_pin_master/assets/111564722/e16fb8f1-727c-43c8-8fab-c793aaadee4e" height="700" align="center"/>
+<img src="https://github.com/matrobiyon/otp_pin_master/assets/111564722/9a54f2e1-d6f7-4eec-aa91-5d0a0fd3fc2b" height="700"  align="center"/>
+
+
 
 ## How to integrate into your app?
 Integrating the project is simple. All you need to do is follow the below steps
