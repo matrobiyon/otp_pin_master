@@ -74,6 +74,7 @@ It appears that you have successfully integrated the library into your project, 
 
   Best regards,
   Qosim,
-  
-  ![flag-tajikistan_1f1f9-1f1ef](https://github.com/matrobiyon/otp_pin_master/assets/111564722/e98b514a-5a39-44bd-bb60-2b5d7a97c1d1)
+
+
+  ![flag-tajikistan_1f1f9-1f1ef](https://github.com/matrobiyon/otp_pin_master/assets/111564722/fa6f41f7-0b16-415e-85ae-9fc8c4b8ed47)
 
