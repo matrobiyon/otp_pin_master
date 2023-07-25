@@ -6,47 +6,51 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
+import android.graphics.drawable.Drawable
 import android.text.InputFilter
 import android.text.InputFilter.LengthFilter
 import android.text.InputType
 import android.util.AttributeSet
-import android.util.Log
+import android.util.DisplayMetrics
 import android.view.ActionMode
 import androidx.appcompat.widget.AppCompatEditText
+import kotlin.math.min
 
 
 class OTPinMaster : AppCompatEditText {
 
-    private var mSpace = 8f // space between the rectangles
+    private var mSpace = 40f // space between the rectangles
     private var mNumMaxLength = 4 // maximum characters
-    private var mTextBottomMargin = 10f // height of the text from our lines. Text's margin from bottom
+    private var mTextBottomMargin =
+        60f // height of the text from our lines. Text's margin from bottom
 
-    private var mRectangleWidth = 32f
-    private var mRectangleHeight = 55f
+    private var backgroundResId : Int? = 0
+    private var mRectangleWidth = 150
+    private var mRectangleHeight = 200
+    private var rectangleCornerRadius = 30f
     private var isCorrect = false
-    private var density = 0f
+    private var density = 0
 
     private var rectanglePaint: Paint? = null
     private var newRectF: RectF? = null
 
-    private val mPaddingLeft = 30
-    private val mPaddingRight = 30
+    private val mPadding = 30
 
     private var textColor: Int = Color.BLACK
     private var activeRectangleColor: Int = Color.GREEN
     private var inactiveRectangleColor: Int = Color.GRAY
     private var errorRectangleColor: Int = Color.RED
 
-    private var isPin : Boolean = false
-    private var circleRadius : Float = 10f
-    private var circleColor : Int = Color.BLACK
+    private var isPin: Boolean = false
+    private var circleRadius: Float = 10f
+    private var circleColor: Int = Color.BLACK
 
     private var animValue = 0f
     private var animator = ValueAnimator.ofFloat(0.0f, 1.0f)
 
     private var notCorrectAnimValue = 0f
     private var notCorrectAnimator = ValueAnimator.ofFloat(0.0f, 1f)
-    private var shakePaddings = 10f
+    private var shakePaddings = 50f
 
     private var inputDigitIndex = 0
     private var mClickListener: OnClickListener? = null
@@ -65,27 +69,44 @@ class OTPinMaster : AppCompatEditText {
         init(context, attrs)
     }
 
+    override fun setBackground(background: Drawable?) {
+    }
+
     private fun init(context: Context, attrs: AttributeSet?) {
 
+        density = context.resources.displayMetrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT
         val typedArray = context.obtainStyledAttributes(attrs, R.styleable.OTPinMaster)
 
+        minimumHeight = 220 / density
+        minWidth = 600 / density
+        setPadding(0,5,0,5)
+
         this.mRectangleWidth =
-            typedArray.getDimension(R.styleable.OTPinMaster_rectangleWidth, mRectangleWidth)
+            typedArray.getDimensionPixelSize(
+                R.styleable.OTPinMaster_rectangleWidth,
+                mRectangleWidth
+            )
         this.mRectangleHeight =
-            typedArray.getDimension(R.styleable.OTPinMaster_rectangleHeight, mRectangleHeight)
-        this.mTextBottomMargin = typedArray.getDimension(R.styleable.OTPinMaster_textBottomPadding,mTextBottomMargin)
+            typedArray.getDimensionPixelSize(
+                R.styleable.OTPinMaster_rectangleHeight,
+                mRectangleHeight
+            )
+        this.mTextBottomMargin =
+            typedArray.getDimension(R.styleable.OTPinMaster_textBottomPadding, mTextBottomMargin)
 
         this.activeRectangleColor =
             typedArray.getColor(R.styleable.OTPinMaster_activeRectangleColor, activeRectangleColor)
         this.inactiveRectangleColor = typedArray.getColor(
             R.styleable.OTPinMaster_inactiveRectangleColor,
-            inactiveRectangleColor)
+            inactiveRectangleColor
+        )
         this.errorRectangleColor =
             typedArray.getColor(R.styleable.OTPinMaster_errorRectangleColor, errorRectangleColor)
 
-        this.circleRadius = typedArray.getDimension(R.styleable.OTPinMaster_circleRadius,circleRadius)
-        this.circleColor = typedArray.getColor(R.styleable.OTPinMaster_circleColor,circleColor)
-        this.isPin = typedArray.getBoolean(R.styleable.OTPinMaster_isPin,isPin)
+        this.circleRadius =
+            typedArray.getDimension(R.styleable.OTPinMaster_circleRadius, circleRadius)
+        this.circleColor = typedArray.getColor(R.styleable.OTPinMaster_circleColor, circleColor)
+        this.isPin = typedArray.getBoolean(R.styleable.OTPinMaster_isPin, isPin)
 
         this.mSpace = typedArray.getDimension(R.styleable.OTPinMaster_rectangleSpace, mSpace)
         val maxLength = typedArray.getInt(R.styleable.OTPinMaster_rectangleCount, mNumMaxLength)
@@ -93,14 +114,11 @@ class OTPinMaster : AppCompatEditText {
 
         typedArray.recycle()
 
-        setBackgroundResource(0)
-        density = context.resources.displayMetrics.density
-        mSpace *= density //convert to pixels for our density
-
-        mTextBottomMargin *= density
-        mRectangleWidth *= density
-        mRectangleHeight *= density
-        shakePaddings *= density
+        mSpace /= density //convert to dp for our density
+        mTextBottomMargin /= density
+        mRectangleWidth /= density
+        mRectangleHeight /= density
+        shakePaddings /= density
 
         rectanglePaint = Paint()
         rectanglePaint?.isAntiAlias = true
@@ -115,6 +133,8 @@ class OTPinMaster : AppCompatEditText {
         val filters = arrayOfNulls<InputFilter>(1)
         filters[0] = LengthFilter(mNumMaxLength)
         setFilters(filters)
+        textSize = 42f / density
+        setBackgroundResource(androidx.appcompat.R.color.abc_decor_view_status_guard_light)
 
         //Animation characters while input
         animator.duration = 200 // Animation duration in milliseconds
@@ -131,7 +151,7 @@ class OTPinMaster : AppCompatEditText {
 
         notCorrectAnimator.addUpdateListener { animation: ValueAnimator ->
             notCorrectAnimValue = animation.animatedValue as Float
-            if (animation.animatedValue as Float >=0.99f){
+            if (animation.animatedValue as Float >= 0.99f) {
                 isCorrect = true
                 text = null
             }
@@ -148,6 +168,11 @@ class OTPinMaster : AppCompatEditText {
 
     override fun setOnClickListener(l: OnClickListener?) {
         mClickListener = l
+    }
+
+    override fun setBackgroundResource(resId: Int) {
+        backgroundResId = resId
+        invalidate()
     }
 
     override fun setCustomSelectionActionModeCallback(actionModeCallback: ActionMode.Callback?) {
@@ -172,29 +197,43 @@ class OTPinMaster : AppCompatEditText {
         super.onTextChanged(text, start, lengthBefore, lengthAfter)
     }
 
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        calculateRectangleHeight(heightMeasureSpec)
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+    }
+
+    private fun calculateRectangleHeight(heightMeasureSpec: Int) {
+        val heightMode = MeasureSpec.getMode(heightMeasureSpec)
+        val heightSize = MeasureSpec.getSize(heightMeasureSpec)
+        if (heightMode == MeasureSpec.EXACTLY) {
+            mRectangleHeight = heightSize
+        } else if (heightMode == MeasureSpec.AT_MOST) {
+            mRectangleHeight = min(mRectangleHeight, heightSize)
+        }
+    }
+
     override fun onDraw(canvas: Canvas) {
 
-        val totalPaddings = paddingLeft + mPaddingLeft + paddingRight + mPaddingRight
+        val totalPaddings = paddingLeft + (2 * mPadding) + paddingRight
         val mPositionedRectanglesWidth =
             (mNumMaxLength * mRectangleWidth) + (mSpace * (mNumMaxLength - 1))
         val leftFreeSpaces = width - totalPaddings - mPositionedRectanglesWidth
 
-        var startX = paddingLeft + mPaddingLeft + (leftFreeSpaces / 2)
+        var startX = paddingLeft + mPadding + (leftFreeSpaces / 2)
         val bottom = mRectangleHeight - paddingBottom
 
-        if (!isCorrect){
-            if (notCorrectAnimValue <= 0.2f){
-                startX += shakeAnimation(shakePaddings,0.1f)
-            }else if (notCorrectAnimValue <=0.4f) {
-                startX += shakeAnimation(shakePaddings,0.3f)
-            }else if (notCorrectAnimValue <= 0.6f){
-                startX += shakeAnimation(shakePaddings, 0.5f)
-            }else if (notCorrectAnimValue <= 0.8f){
-                startX += shakeAnimation(shakePaddings, 0.7f)
-            }else {
-                startX += shakeAnimation(shakePaddings, 0.9f)
+        if (!isCorrect) {
+            startX += if (notCorrectAnimValue <= 0.2f) {
+                shakeAnimation(shakePaddings, 0.1f)
+            } else if (notCorrectAnimValue <= 0.4f) {
+                shakeAnimation(shakePaddings, 0.3f)
+            } else if (notCorrectAnimValue <= 0.6f) {
+                shakeAnimation(shakePaddings, 0.5f)
+            } else if (notCorrectAnimValue <= 0.8f) {
+                shakeAnimation(shakePaddings, 0.7f)
+            } else {
+                shakeAnimation(shakePaddings, 0.9f)
             }
-            animateIfNotCorrect()
         }
 
         //Text Width
@@ -208,7 +247,7 @@ class OTPinMaster : AppCompatEditText {
         while (i < mNumMaxLength) {
 
             newRectF!![startX, paddingTop.toFloat(), startX + mRectangleWidth] =
-                bottom
+                bottom.toFloat()
 
             if (getText()!!.length > i) {
 
@@ -221,9 +260,9 @@ class OTPinMaster : AppCompatEditText {
                     animationState
                 } else bottomBaseline
 
-                if (isPin){
-                    drawCircle(startX,canvas,circleRadius!!,circleColor!!)
-                }else {
+                if (isPin) {
+                    drawCircle(startX, canvas, circleRadius!!, circleColor!!)
+                } else {
                     canvas.drawText(
                         text, i, i + 1, middle - textWidths[0] / 2, finalBottomBaseline,
                         paint
@@ -232,7 +271,12 @@ class OTPinMaster : AppCompatEditText {
             } else {
                 rectanglePaint!!.color = inactiveRectangleColor
             }
-            canvas.drawRoundRect(newRectF!!, 15.0f, 15f, rectanglePaint!!)
+            canvas.drawRoundRect(
+                newRectF!!,
+                rectangleCornerRadius,
+                rectangleCornerRadius,
+                rectanglePaint!!
+            )
 
             //Changing rectangle start position for next character
             startX += if (mSpace < 0) {
@@ -244,14 +288,10 @@ class OTPinMaster : AppCompatEditText {
         }
     }
 
-    private fun animateIfNotCorrect() {
-
-    }
-
-    private fun drawCircle(startX: Float,canvas: Canvas,circleRadius : Float,circleColor: Int) {
+    private fun drawCircle(startX: Float, canvas: Canvas, circleRadius: Float, circleColor: Int) {
         val centerX = startX + mRectangleWidth / 2f
         val centerY = mRectangleHeight / 2f
-        canvas.drawCircle(centerX,centerY,circleRadius,Paint().also {
+        canvas.drawCircle(centerX, centerY, circleRadius, Paint().also {
             it.color = circleColor
             it.style = Paint.Style.FILL
         })
@@ -274,13 +314,11 @@ class OTPinMaster : AppCompatEditText {
         setFilters(filters)
     }
 
-    private fun shakeAnimation(mShakePadding : Float, halfPercent : Float) : Float{
-        return if (notCorrectAnimValue <= halfPercent){
-//            Log.d("TAG", "shakeAnimation: $notCorrectAnimValue")
-            (mShakePadding * (halfPercent - notCorrectAnimValue))/0.1f
-        }else {
-            Log.d("TAG", "shakeAnimation: $notCorrectAnimValue")
-            mShakePadding * (((notCorrectAnimValue - halfPercent))*10)
+    private fun shakeAnimation(mShakePadding: Float, halfPercent: Float): Float {
+        return if (notCorrectAnimValue <= halfPercent) {
+            (mShakePadding * (halfPercent - notCorrectAnimValue)) / 0.1f
+        } else {
+            mShakePadding * (((notCorrectAnimValue - halfPercent)) * 10)
         }
     }
 
@@ -292,7 +330,7 @@ class OTPinMaster : AppCompatEditText {
     }
 
     fun setRectangleWidth(px: Int) {
-        this.mRectangleWidth = px * density
+        this.mRectangleWidth = px / density
     }
 
     fun setRectangleHeight(px: Int) {
@@ -317,25 +355,30 @@ class OTPinMaster : AppCompatEditText {
         this.errorRectangleColor = color
     }
 
-    fun setRectangleSpace(dp: Int) {
-        this.mSpace = dp * density
+    fun setRectangleSpace(dp: Float) {
+        this.mSpace = dp / density
     }
 
     fun setRectangleCount(count: Int) {
         this.mNumMaxLength = if (count <= 7) count else mNumMaxLength
     }
-    fun setCircleColor(color: Int){
+
+    fun setCircleColor(color: Int) {
         this.circleColor = color
     }
-    fun setCircleRadius(dp : Float){
-        this.circleRadius = dp * density
+
+    fun setCircleRadius(dp: Float) {
+        this.circleRadius = dp / density
     }
-    fun setIsPin(isPin : Boolean){
+
+    fun setIsPin(isPin: Boolean) {
         this.isPin = isPin
     }
-    fun setTextBottomPadding(dp : Int){
-        this.mTextBottomMargin = dp * density
+
+    fun setTextBottomPadding(px: Float) {
+        this.mTextBottomMargin = px / density
     }
+
     fun setOnDoneListener(onDoneListener: (Int) -> Unit) {
         this.onDoneListener = onDoneListener
     }
