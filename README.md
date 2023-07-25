@@ -22,7 +22,7 @@ allprojects {
 Step 2. Add the dependency
 ```java
 dependencies {
-        implementation 'com.github.mukeshsolanki.android-otpview-pinview:otpview:3.1.0'
+        implementation 'com.github.matrobiyon:otp_pin_master:1.1.1'
 }
 ```
 
