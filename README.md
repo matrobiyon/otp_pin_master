@@ -62,6 +62,38 @@ It appears that you have successfully integrated the library into your project, 
      */
   }
   ```
+  Attribues which you can change for yout customisation
+### Atributes
+  Element                                    | Attribute                          
+-------------------------------------------- | ------------------------
+**Width measurement**                        | `rectangleWidth`        
+**Height measurement**                       | `rectangleHeight`
+**Size of text element**                     | `textSize`
+**Color for active rectangles**              | `activeRectangleColor`
+**Color for inactive rectangles**            | `inactiveRectangleColor`
+**Color for rectangles indicating errors**   | `errorRectangleColor`
+**Number of rectangles**                     | `rectangleCount`
+**Spacing between rectangles**               | `rectangleSpace`
+**Color of a circle shape**                  | `circleColor`
+**Radius measurement of a circle**           | `circleRadius`
+**Boolean value representing if it's a PIN** | `isPin`
+**Bottom margin spacing for text**           | `textBottomMargin`
+
+  or you can set them programatically
+### Atributes programatically
+`setRectangleWidth`
+`setRectangleHeight`
+`setTextSize`
+`setActiveRectangleColor`
+`setInActiveRectangleColor`
+`setErrorRectangleColor`
+`setRectangleCount`
+`setRectangleSpace`
+`setCircleColor`
+`setCircleRadius`
+`setIsPin`
+`setTextBottomMargin`
+  
   That's it. Congratulations 🥳
 
   This project is just the beginning and there's much more work to be done. I would greatly appreciate any contributions you can make. Your help will make a big difference!
